@@ -115,7 +115,7 @@ end
 
 Although functions are integrated, database tables are still divided. So `post_subjects` is more complicated than others.
 
-First, we have to parse datas inputted in server.
-Second, create subject using some of parsed datas. If datas' `update_timestamp` and `device_timestamp` are nil, get original data using `unique_id` in parsed datas and change some parsed values to original values.
-Third, create enrollment using datas remained. If datas' `update_timestamp` and `device_timestamp` are nil, do same upper case.
-At last, get all datas that `server_timestamp` is larger than `recent_timestamp` in parsed data from database.
+- First, we have to parse datas inputted in server.
+- Second, create subject using some of parsed datas. If datas' `update_timestamp` and `device_timestamp` are nil, get original data using `unique_id` in parsed datas and change some parsed values to original values.
+- Third, create enrollment using datas remained. If datas' `update_timestamp` and `device_timestamp` are nil, do same upper case.
+- At last, get all datas that `server_timestamp` is larger than `recent_timestamp` in parsed data from database.
