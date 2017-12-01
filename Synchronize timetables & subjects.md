@@ -32,7 +32,7 @@ This case is fully complicated. Because we have to keep all datas, It is really 
 
     But we know the best way to upgrade database!
 
-After finishing upgrade database, we synchronize all datas to server. We can know what datas need synchronization because `server_timestamp` is nil or null. We also use this way when user create timetable, subject.
+After finishing upgrade database, we synchronize all datas to server. We can know what datas need synchronization because `server_timestamp` is nil or null. We also use this way when user create timetable and subject.
 
     When user create timetable and subject, `server_timestamp` is also nil or null.
     So when first synchronize, `update_timestamp` and `device_timestamp` are also nil or null.
@@ -70,7 +70,17 @@ After finishing upgrade database, we synchronize all datas to server. We can kno
 ```
 We just get 4 columns' datas from server. So we using `INSERT OR REPLACE INTO` query!
 
-After that, we change subject add function when users use search.
+After that, we change subject add function when users search subjects. In previous verison, users have to wait the processing finished. But now nothing waits to do. All functions do in main controller or activity.
+
+There are three processes we have to change. One is adding subject. Another is editing subject. the other is deleting subject.
+
+These processes are also same with search.
+
+#####Note
+All processes must proceed in order.
+In other words, you can proceed subjects synchronize after completing timetables synchronization.
+
+
 
 ***
 ### Server
@@ -119,3 +129,14 @@ Although functions are integrated, database tables are still divided. So `post_s
 - Second, create subject using some of parsed datas. If datas' `update_timestamp` and `device_timestamp` are nil, get original data using `unique_id` in parsed datas and change some parsed values to original values.
 - Third, create enrollment using datas remained. If datas' `update_timestamp` and `device_timestamp` are nil, do same upper case.
 - At last, get all datas that `server_timestamp` is larger than `recent_timestamp` in parsed data from database.
+
+In SubjectsController, post_subjects process contains function that create subject datas to `ElasticSearch`. Before we just use
+```ruby
+@subject.__elasticsearch__.index_document
+```
+
+But now we change
+```ruby
+```
+
+In `Aurora`, primary key type is `INTEGER` in subjects table. So server subject model's id type also `INTEGER`. We have to do deprecate it.
