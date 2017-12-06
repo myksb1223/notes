@@ -3,14 +3,20 @@
 Before we write this documents, it needs to define some words meaning.
 Timetable is same with schedule.
 Subject is same with class.
-Because we use words timetable and class when it is first developed, database table or codes are using these words. But we use schedule and class when we expain some models and relationship each other.
+Because we use words timetable and subject when it is first developed, database table or codes are using these words. But we use schedule and class when we expain some models and relationship each other.
 
 ### Goal
 - We have been running two database systems. One is Amazon **`Aurora`** is known as relational database MySQL. The other is Amazon **`DynamoDb`** is known as NoSQL.
-- Because of data backup and performance, we created same tables in each databases. But now we do not use **`Aurora`** tables, so we decide to remove the tables.
-- There is the most important reason. **`Aurora`** is so slow as subject datas increase. When we read something in subjects table, Computer always freeze up or it returns data too slowly. So we moved all datas to **`DynamoDb`** and have been running both systems. Now we make a decision removing  **`Aurora`** tables.
+- Because of data backup and performance, we created same tables in each databases. But now we do not use **`Aurora`** tables, so we decide to remove these tables.
+- There is the most important reason. **`Aurora`** is so slow as subject datas increase. When we read something in subjects table, computer always freeze up or it returns data too slowly. So we moved all datas to **`DynamoDb`** and have been running both systems. Now we make a decision removing  **`Aurora`** tables.
 
 ***
+### `unique_id` Schema
+- Timetable
+  - unique_id : (user_id)_(timestamp)
+- Subject
+  - unique_id : (user_id)_(timestamp)
+
 ### Devices
 - First, add 4 columns in default tables.(server_timestamp, update_timestamp, device_timestamp, status)
   - `server_timestamp` is for checking whether a data is synchronized and shows created time.
@@ -70,17 +76,23 @@ After finishing upgrade database, we synchronize all datas to server. We can kno
 ```
 We just get 4 columns' datas from server. So we using `INSERT OR REPLACE INTO` query!
 
+##### Subject
 After that, we change subject add function when users search subjects. In previous verison, users have to wait the processing finished. But now nothing waits to do. All functions do in main controller or activity.
 
 There are three processes we have to change. One is adding subject. Another is editing subject. the other is deleting subject.
 
-These processes are also same with search.
+These processes are also same with subject search.
 
-#####Note
-All processes must proceed in order.
-In other words, you can proceed subjects synchronize after completing timetables synchronization.
+`status` field will be changed to 2 in delete process and 1 in edit process.
 
+##### Timetable
+In previous version, timetables are not synchronized to server. So changed datas are not saved in server. Many users have asked us why timetable infomation is not same with before. But now all information can be saved. 
 
+Timetable is also processed same ways in subject. But There is one thing we have to work. That is timetable background synchronization.
+
+We will save a background to Amazon `S3`. So we have to add the function of that.
+
+The function was writed down in `Send image to S3`.
 
 ***
 ### Server
