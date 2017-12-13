@@ -86,9 +86,9 @@ These processes are also same with subject search.
 `status` field will be changed to 2 in delete process and 1 in edit process.
 
 ##### Timetable
-In previous version, timetables are not synchronized to server. So changed datas are not saved in server. Many users have asked us why timetable infomation is not same with before. But now all information can be saved. 
+In previous version, timetables are not synchronized to server. So changed datas are not saved in server. Many users have asked us why timetable infomation is not same with before. But now all information can be saved.
 
-Timetable is also processed same ways in subject. But There is one thing we have to work. That is timetable background synchronization.
+Timetable is also processed same ways in subject. But there is one thing we have to work. That is timetable background synchronization.
 
 We will save a background to Amazon `S3`. So we have to add the function of that.
 
@@ -98,7 +98,7 @@ The function was writed down in `Send image to S3`.
 ### Server
 Users make many schedules relate with their semesters. users also listen classes. So legacy server database table has users, timetables, subjects, enrollments.
 
-In Legacy server, create subjects, create enrollments, delete enrollments function have been divided. But now all functions is integrated.
+In Legacy server, create subjects, create enrollments and delete enrollments function have been divided. But now all functions is integrated.
 
 #### Legacy
 ```ruby
@@ -142,6 +142,10 @@ Although functions are integrated, database tables are still divided. So `post_s
 - Third, create enrollment using datas remained. If datas' `update_timestamp` and `device_timestamp` are nil, do same upper case.
 - At last, get all datas that `server_timestamp` is larger than `recent_timestamp` in parsed data from database.
 
+We will save all things changed by users. So `enrollment` table in `DynamoDb` needs lots of fields more.(days, end time, each day for location)
+
+When getting subjects user enrolled, the datas some fields will be updated by enrollment datas.
+
 In SubjectsController, post_subjects process contains function that create subject datas to `ElasticSearch`. Before we just use
 ```ruby
 @subject.__elasticsearch__.index_document
@@ -149,6 +153,18 @@ In SubjectsController, post_subjects process contains function that create subje
 
 But now we change
 ```ruby
+$client.bulk body: body
 ```
 
 In `Aurora`, primary key type is `INTEGER` in subjects table. So server subject model's id type also `INTEGER`. We have to do deprecate it.
+
+So, we create new index `subjects_v2` in `ElasticSearch`. `_id` field and `subject_id` field type will be changed to `String`.
+
+We have to add subject data to `ElasticSearch` when users create, edit or enroll subject. We use `bulk` api to process them.
+
+
+
+UserTimetable `subject_ids` field will be removed.
+
+***
+### ElasticSearch
