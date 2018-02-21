@@ -26,11 +26,14 @@ long msec = expiration.getTime();
 msec += 1000 * 60 * 60; // Add 1 hour.
 expiration.setTime(msec);
 
-GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, object_key);
-generatePresignedUrlRequest.setMethod(HttpMethod.GET);
-generatePresignedUrlRequest.setExpiration(expiration);
-ps = Util.getS3Client(ClassUpApplication.this).generatePresignedUrl(generatePresignedUrlRequest);
+try {
+  GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, object_key);
+  generatePresignedUrlRequest.setMethod(HttpMethod.GET);
+  generatePresignedUrlRequest.setExpiration(expiration);
+  ps = Util.getS3Client(ClassUpApplication.this).generatePresignedUrl(generatePresignedUrlRequest);
+} catch (AmazonClientException ex) {
 
+}
 com.squareup.okhttp.Request requestWithToken = originalRequest.newBuilder().url(ps).build();
 ```
 
